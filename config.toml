@@ -28,8 +28,8 @@ d_max = 2             # MetropolisExchange: swap spins up to graph distance d_ma
 # auto_alpha = true makes `alpha` the STARTING exponent only; VMC_NG then tunes
 # it every step. Needs on_the_fly = false and a complex-output wavefunction
 # (the ViT always; RBM / Jastrow with param_dtype = "complex128").
-alpha = 1.25
-auto_alpha = true
+alpha = 2.0
+auto_alpha = false    # hold alpha fixed at the value above
 use_ntk = true        # neural tangent kernel
 on_the_fly = false
 
@@ -62,7 +62,7 @@ param_dtype = "complex128"    # "float64" relies on sign_rule for the sign
 #   What worked: symmetries = "translation", param_dtype = "float64",
 #   sign_rule = "TF" (the J2 = 0 ground state is then positive), plain SR
 #   (auto_alpha = false, alpha = 2.0): E/site -0.6993, rel. err 3.6e-3.
-alpha = 1
+alpha = 1.0
 symmetries = "none"           # "none" | "translation" | "space_group"
 use_visible_bias = true       # ignored for symmetric RBMs: their single bias
                               # multiplies sum_i s_i = 0 at Sz = 0
@@ -134,3 +134,19 @@ EXACT_SAMPLER_MAX_STATES = 200_000
 #   initial_learning_rate = [1e-1, 1e-1, 5e-2]
 #   final_learning_rate   = [1e-1, 1e-1, 2e-2]
 # ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+# ACTIVE SWEEP -- 4 runs, zipped column-wise (column i -> run_000i):
+#   run_0000  Jastrow
+#   run_0001  RBM, hidden-unit density 1.0
+#   run_0002  RBM, hidden-unit density 2.0
+#   run_0003  ViT, num_layers=2, n_heads=12, d_model=72 (ratio 6), as in [model.vit]
+# model.rbm.alpha is only read by the RBM runs. The Jastrow and ViT columns
+# hold the base value 1.0 because every zipped list needs 4 entries; it is
+# ignored there, but it will still appear in their manifest sweep_values.
+# ----------------------------------------------------------------------
+[sweep_zip.model]
+type = ["jastrow", "rbm", "rbm", "vit"]
+
+[sweep_zip.model.rbm]
+alpha = [1.0, 1.0, 2.0, 1.0]
