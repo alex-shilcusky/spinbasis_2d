@@ -1,0 +1,31 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Run history before output redirected
+run_hist/*
+!run_hist/.gitkeep
+
+# Debugging files
+debugging/*
+!debugging/.gitkeep
+
+# macOS
+.DS_Store
+
+# Local archives / bundles
+*.tar.gz
+
+# Reference papers kept alongside the code (git add -f to track one on purpose)
+*.pdf
+# Run output (submit.sh's default RUN_ROOT). Must stay ignored: submit.sh
+# refuses to submit from a dirty tree, so tracked-looking output would block
+# every submission after the first.
+spinbasis_data/

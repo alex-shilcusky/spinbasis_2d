@@ -1,0 +1,136 @@
+# ----------------------------------------------------------------------
+# Base configuration  (spin basis; companion to 2d_eigenbasis/config.toml)
+#
+# Energies are logged in S = sigma/2 units, the same as the eigenbasis runs,
+# so learning rates below are directly comparable to that config. (NetKet's
+# Heisenberg operator is in Pauli units, 4x larger; run_2D_spinbasis.py scales
+# it by 1/4.)
+# ----------------------------------------------------------------------
+
+[system]
+L = 6                 # L x L periodic square lattice, N = L^2 spins
+J1 = 1.0
+J2 = 0.0
+sign_rule = "FF"      # Marshall sign rule per [J1, J2] bond family, T/F each
+
+[sampler]
+SAMPLER = "auto"      # "auto" (exact if the Sz=0 sector <= EXACT_SAMPLER_MAX_STATES) | "exact" | "metro"
+MONTECARLO = 4        # N_samples = 2048 * MONTECARLO
+seed = 0
+chains = 16           # n_chains (metro only)
+discard_per_chain = 100   # n_discard_per_chain (metro only); -1 = NetKet default
+d_max = 2             # MetropolisExchange: swap spins up to graph distance d_max
+                      # (2 includes the J2 diagonals)
+
+[distribution]
+# Importance sampling: draw from q = |psi|^alpha instead of |psi|^2 and
+# reweight. alpha = 2.0 with auto_alpha = false is plain SR.
+# auto_alpha = true makes `alpha` the STARTING exponent only; VMC_NG then tunes
+# it every step. Needs on_the_fly = false and a complex-output wavefunction
+# (the ViT always; RBM / Jastrow with param_dtype = "complex128").
+alpha = 1.25
+auto_alpha = true
+use_ntk = true        # neural tangent kernel
+on_the_fly = false
+
+[model]
+iter = 10000          # N_ITER (total across resubmissions)
+type = "vit"          # "jastrow" | "rbm" | "vit" -- selects one table below
+
+# Only the table matching `type` is read; the others are ignored, so sweeping
+# model.type needs no other edits.
+
+[model.jastrow]
+# log psi = sum_{i<j} W_ij s_i s_j, a full N x N pair table.
+param_dtype = "complex128"    # "float64" relies on sign_rule for the sign
+# init_std = 0.01             # stddev of the normal init; unset = NetKet default
+
+[model.rbm]
+# alpha = hidden-unit density. With symmetries != "none" it counts feature
+# maps as alpha * N / |G|, so it must be >= |G| / N:
+#   "translation"  |G| = N        -> alpha >= 1
+#   "space_group"  |G| = 8N (C4v) -> alpha >= 8
+#
+# Symmetric RBMs are the fragile ones here (tested on 4x4, 100 steps):
+#   * They fall easily into the Neel state, E/site = -0.5 exactly: E_loc is
+#     then just the zz term with ZERO variance, so sampled SR sees a stationary
+#     point and stops. This is the optimizer, not the ansatz -- optimizing the
+#     EXACT energy, the space-group RBM reaches -0.697 (E0 = -0.70178).
+#   * complex128 + sign_rule "FF" stalls at -0.5; complex cosh has zeros, and
+#     summing over |G| images makes psi ~ 0 (-> E_loc blow-ups) likely.
+#   * auto_alpha = true went NaN within ~10 steps for every symmetric RBM tried.
+#   What worked: symmetries = "translation", param_dtype = "float64",
+#   sign_rule = "TF" (the J2 = 0 ground state is then positive), plain SR
+#   (auto_alpha = false, alpha = 2.0): E/site -0.6993, rel. err 3.6e-3.
+alpha = 1
+symmetries = "none"           # "none" | "translation" | "space_group"
+use_visible_bias = true       # ignored for symmetric RBMs: their single bias
+                              # multiplies sum_i s_i = 0 at Sz = 0
+param_dtype = "complex128"
+# init_std = 0.1              # stddev of the normal init; unset = NetKet default
+#                             # (0.01 for RBM, 0.1 for symmetric RBM)
+
+[model.vit]
+# The tutorial's spin-basis ViT (factored attention). Real parameters, complex
+# output. d_model must be divisible by n_heads; L by patch_size.
+# transl_invariant = true enforces translations by whole patches only, i.e.
+# (L / patch_size)^2 of the L^2 lattice translations.
+num_layers = 2
+d_model = 72                  # = 6 * 12, the eigenbasis run's ratio * heads
+n_heads = 12
+patch_size = 2
+transl_invariant = true
+
+[optimizer]
+# Stochastic reconfiguration: optax.sgd carries the lr schedule and VMC_NG
+# solves (S + diag_shift * I) delta = F each step. Same defaults as the
+# eigenbasis config, i.e. tuned for the ViT. The NetKet tutorials use a much
+# larger diag_shift (0.1) for Jastrow / RBM; worth sweeping when comparing.
+initial_learning_rate = 5e-2
+final_learning_rate = 2e-2
+initial_diagonal_shift = 1e-3
+final_diagonal_shift = 1e-4
+lr_transition_steps = 400
+ds_transition_steps = 400
+
+[run]
+# Graceful-stop budget. MUST stay below --time in run.sh:
+#     b200-devel (--time=04:00:00)  ->  230
+#     b200-batch (--time=24:00:00)  ->  1380
+MAX_RUNTIME_MIN = 230
+SAVE_EVERY = 50       # checkpoint (+ .progress) and log-flush interval
+PRINT_EVERY = 20
+DIAG_EVERY = -1       # sampling-health diag -> .diag.jsonl; -1 = PRINT_EVERY, 0 = off
+CHUNK_SIZE = 2048
+
+[misc]
+EXACT_SAMPLER_MAX_STATES = 200_000
+
+# ----------------------------------------------------------------------
+# Parameter sweep
+#
+# A swept key must already exist in the base configuration above, or
+# submit.sh aborts. Nested tables work: [sweep.model.vit] num_layers = [...]
+#
+# [sweep.*]     -> Cartesian product (every combination)
+# [sweep_zip.*] -> zipped column-wise (specific tuples only); every list in
+#                  the zipped tables must have the same length, across sections
+#
+# Compare the three wavefunctions -- 3 runs:
+#   [sweep.model]
+#   type = ["jastrow", "rbm", "vit"]
+#
+# ViT depth x width -- 2 x 2 = 4 runs:
+#   [sweep.model.vit]
+#   num_layers = [2, 8]
+#   d_model = [48, 72]
+#
+# Each wavefunction with its own learning rate -- 3 runs, NOT 27. The tutorials
+# take larger SR steps for Jastrow / RBM than for the ViT (0.01 / 0.05 vs
+# 0.0075 in Pauli units, i.e. ~0.04 / 0.2 vs 0.03 here); a starting point:
+#   [sweep_zip.model]
+#   type = ["jastrow", "rbm", "vit"]
+#   [sweep_zip.optimizer]
+#   initial_learning_rate = [1e-1, 1e-1, 5e-2]
+#   final_learning_rate   = [1e-1, 1e-1, 2e-2]
+# ----------------------------------------------------------------------
