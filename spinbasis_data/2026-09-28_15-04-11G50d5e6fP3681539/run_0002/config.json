@@ -1,0 +1,60 @@
+{
+  "system": {
+    "L": 6,
+    "J1": 1.0,
+    "J2": 0.0,
+    "sign_rule": "FF"
+  },
+  "sampler": {
+    "SAMPLER": "auto",
+    "MONTECARLO": 4,
+    "seed": 0,
+    "chains": 16,
+    "discard_per_chain": 100,
+    "d_max": 2
+  },
+  "distribution": {
+    "alpha": 2.0,
+    "auto_alpha": false,
+    "use_ntk": true,
+    "on_the_fly": false
+  },
+  "model": {
+    "iter": 10000,
+    "type": "rbm",
+    "jastrow": {
+      "param_dtype": "complex128"
+    },
+    "rbm": {
+      "alpha": 2.0,
+      "symmetries": "none",
+      "use_visible_bias": true,
+      "param_dtype": "complex128"
+    },
+    "vit": {
+      "num_layers": 2,
+      "d_model": 72,
+      "n_heads": 12,
+      "patch_size": 2,
+      "transl_invariant": true
+    }
+  },
+  "optimizer": {
+    "initial_learning_rate": 0.05,
+    "final_learning_rate": 0.02,
+    "initial_diagonal_shift": 0.001,
+    "final_diagonal_shift": 0.0001,
+    "lr_transition_steps": 400,
+    "ds_transition_steps": 400
+  },
+  "run": {
+    "MAX_RUNTIME_MIN": 230,
+    "SAVE_EVERY": 50,
+    "PRINT_EVERY": 20,
+    "DIAG_EVERY": -1,
+    "CHUNK_SIZE": 2048
+  },
+  "misc": {
+    "EXACT_SAMPLER_MAX_STATES": 200000
+  }
+}

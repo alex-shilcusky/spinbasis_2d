@@ -1,0 +1,125 @@
+============================================================
+Spin-basis 2D Run
+============================================================
+Started:      2026-09-28T20:48:12-04:00
+Run ID:       2
+Sweep ID:     1108216
+Slurm job ID: 1110589
+Node:         b0031
+
+Repo root:    /home/shilcusky_a_neu/master/spinbasis_2d
+Interpreter:  /home/shilcusky_a_neu/master/spinbasis_2d/.venv/bin/python
+Python:       Python 3.13.15
+
+Resolved configuration written to:
+  /home/shilcusky_a_neu/master/spinbasis_2d/spinbasis_data/2026-09-28_15-04-11G50d5e6fP3681539/run_0002/config.json
+
+Manifest written to:
+  /home/shilcusky_a_neu/master/spinbasis_2d/spinbasis_data/2026-09-28_15-04-11G50d5e6fP3681539/run_0002/manifest.json
+
+Configuration:
+{
+  "system": {
+    "L": 6,
+    "J1": 1.0,
+    "J2": 0.0,
+    "sign_rule": "FF"
+  },
+  "sampler": {
+    "SAMPLER": "auto",
+    "MONTECARLO": 4,
+    "seed": 0,
+    "chains": 16,
+    "discard_per_chain": 100,
+    "d_max": 2
+  },
+  "distribution": {
+    "alpha": 2.0,
+    "auto_alpha": false,
+    "use_ntk": true,
+    "on_the_fly": false
+  },
+  "model": {
+    "iter": 10000,
+    "type": "rbm",
+    "jastrow": {
+      "param_dtype": "complex128"
+    },
+    "rbm": {
+      "alpha": 2.0,
+      "symmetries": "none",
+      "use_visible_bias": true,
+      "param_dtype": "complex128"
+    },
+    "vit": {
+      "num_layers": 2,
+      "d_model": 72,
+      "n_heads": 12,
+      "patch_size": 2,
+      "transl_invariant": true
+    }
+  },
+  "optimizer": {
+    "initial_learning_rate": 0.05,
+    "final_learning_rate": 0.02,
+    "initial_diagonal_shift": 0.001,
+    "final_diagonal_shift": 0.0001,
+    "lr_transition_steps": 400,
+    "ds_transition_steps": 400
+  },
+  "run": {
+    "MAX_RUNTIME_MIN": 230,
+    "SAVE_EVERY": 50,
+    "PRINT_EVERY": 20,
+    "DIAG_EVERY": -1,
+    "CHUNK_SIZE": 2048
+  },
+  "misc": {
+    "EXACT_SAMPLER_MAX_STATES": 200000
+  }
+}
+
+Starting simulation...
+
+#############
+2026-09-28 20:48:17
+[CudaDevice(id=0)]
+#############
+
+L=6x6  N=36  J1=1.0 J2=0.0  sign_rule=FF [False, False]  iters=10000 (total)
+N_samples=8192 (=2048*4)  seed=0  n_chains=16  n_discard_per_chain=100  d_max=2
+lr=[0.05,0.02] ds=[0.001,0.0001] trans(lr/ds)=400/400
+driver: overdispersed VMC_NG  ALPHA=2.0 (fixed)  use_ntk=True  on_the_fly=False  chunk_size=2048
+n_states (Sz=0) = too large to index
+ED skipped (sector too large).
+
+fname='/home/shilcusky_a_neu/master/spinbasis_2d/spinbasis_data/2026-09-28_15-04-11G50d5e6fP3681539/run_0002/run'
+do_resume=False  step_offset=0
+remaining this submission = 10000
+
+Schedules @ global step 0:
+  lr         = 5.0000e-02   (0.05 -> 0.02 over 400)
+  diag_shift = 1.0000e-03   (0.001 -> 0.0001 over 400)
+
+wavefunction: RBM(alpha=2.0, param_dtype=complex128, use_visible_bias=True, init_std=default)
+sampler=metro  n_params=2700  n_discard_per_chain=100
+driver mode = complex
+sampling diagnostics -> run.diag.jsonl every 20 steps
+[     0] E=17.99140082  E/site=0.49976113
+    [diag      0] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.000 acc=0.98 Var/site=6.934e-04
+[    20] E=-23.17420974  E/site=-0.64372805
+    [diag     20] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.003 acc=0.35 Var/site=7.412e-02
+[    40] E=-24.27367840  E/site=-0.67426884
+    [diag     40] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=1.630e-02
+[    60] E=-24.32181931  E/site=-0.67560609
+    [diag     60] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.021 acc=0.31 Var/site=1.711e-02
+[    80] E=-24.32762338  E/site=-0.67576732
+    [diag     80] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.017 acc=0.31 Var/site=1.717e-02
+[   100] E=-24.31277873  E/site=-0.67535496
+    [diag    100] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.31 Var/site=1.628e-02
+[   120] E=-24.32400545  E/site=-0.67566682
+    [diag    120] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.028 acc=0.30 Var/site=1.622e-02
+[   140] E=-24.34701341  E/site=-0.67630593
+    [diag    140] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.020 acc=0.31 Var/site=1.673e-02
+[   160] E=-24.33603300  E/site=-0.67600092
+    [diag    160] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.30 Var/site=1.506e-02

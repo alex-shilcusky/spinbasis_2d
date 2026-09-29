@@ -1,0 +1,405 @@
+============================================================
+Spin-basis 2D Run
+============================================================
+Started:      2026-09-28T18:42:57-04:00
+Run ID:       1
+Sweep ID:     1108216
+Slurm job ID: 1109731
+Node:         b0031
+
+Repo root:    /home/shilcusky_a_neu/master/spinbasis_2d
+Interpreter:  /home/shilcusky_a_neu/master/spinbasis_2d/.venv/bin/python
+Python:       Python 3.13.15
+
+Resolved configuration written to:
+  /home/shilcusky_a_neu/master/spinbasis_2d/spinbasis_data/2026-09-28_15-04-11G50d5e6fP3681539/run_0001/config.json
+
+Manifest written to:
+  /home/shilcusky_a_neu/master/spinbasis_2d/spinbasis_data/2026-09-28_15-04-11G50d5e6fP3681539/run_0001/manifest.json
+
+Configuration:
+{
+  "system": {
+    "L": 6,
+    "J1": 1.0,
+    "J2": 0.0,
+    "sign_rule": "FF"
+  },
+  "sampler": {
+    "SAMPLER": "auto",
+    "MONTECARLO": 4,
+    "seed": 0,
+    "chains": 16,
+    "discard_per_chain": 100,
+    "d_max": 2
+  },
+  "distribution": {
+    "alpha": 2.0,
+    "auto_alpha": false,
+    "use_ntk": true,
+    "on_the_fly": false
+  },
+  "model": {
+    "iter": 10000,
+    "type": "rbm",
+    "jastrow": {
+      "param_dtype": "complex128"
+    },
+    "rbm": {
+      "alpha": 1.0,
+      "symmetries": "none",
+      "use_visible_bias": true,
+      "param_dtype": "complex128"
+    },
+    "vit": {
+      "num_layers": 2,
+      "d_model": 72,
+      "n_heads": 12,
+      "patch_size": 2,
+      "transl_invariant": true
+    }
+  },
+  "optimizer": {
+    "initial_learning_rate": 0.05,
+    "final_learning_rate": 0.02,
+    "initial_diagonal_shift": 0.001,
+    "final_diagonal_shift": 0.0001,
+    "lr_transition_steps": 400,
+    "ds_transition_steps": 400
+  },
+  "run": {
+    "MAX_RUNTIME_MIN": 230,
+    "SAVE_EVERY": 50,
+    "PRINT_EVERY": 20,
+    "DIAG_EVERY": -1,
+    "CHUNK_SIZE": 2048
+  },
+  "misc": {
+    "EXACT_SAMPLER_MAX_STATES": 200000
+  }
+}
+
+Starting simulation...
+
+#############
+2026-09-28 18:43:03
+[CudaDevice(id=0)]
+#############
+
+L=6x6  N=36  J1=1.0 J2=0.0  sign_rule=FF [False, False]  iters=10000 (total)
+N_samples=8192 (=2048*4)  seed=0  n_chains=16  n_discard_per_chain=100  d_max=2
+lr=[0.05,0.02] ds=[0.001,0.0001] trans(lr/ds)=400/400
+driver: overdispersed VMC_NG  ALPHA=2.0 (fixed)  use_ntk=True  on_the_fly=False  chunk_size=2048
+n_states (Sz=0) = too large to index
+ED skipped (sector too large).
+
+fname='/home/shilcusky_a_neu/master/spinbasis_2d/spinbasis_data/2026-09-28_15-04-11G50d5e6fP3681539/run_0001/run'
+do_resume=False  step_offset=0
+remaining this submission = 10000
+
+Schedules @ global step 0:
+  lr         = 5.0000e-02   (0.05 -> 0.02 over 400)
+  diag_shift = 1.0000e-03   (0.001 -> 0.0001 over 400)
+
+wavefunction: RBM(alpha=1.0, param_dtype=complex128, use_visible_bias=True, init_std=default)
+sampler=metro  n_params=1368  n_discard_per_chain=100
+driver mode = complex
+sampling diagnostics -> run.diag.jsonl every 20 steps
+[     0] E=17.99339257  E/site=0.49981646
+    [diag      0] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.000 acc=0.98 Var/site=5.763e-04
+[    20] E=-18.83007004  E/site=-0.52305750
+    [diag     20] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.003 acc=0.22 Var/site=1.853e-01
+[    40] E=-23.83189600  E/site=-0.66199711
+    [diag     40] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.021 acc=0.26 Var/site=6.813e-02
+[    60] E=-24.20228764  E/site=-0.67228577
+    [diag     60] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.018 acc=0.33 Var/site=2.837e-02
+[    80] E=-24.22448986  E/site=-0.67290250
+    [diag     80] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.33 Var/site=2.464e-02
+[   100] E=-24.25076621  E/site=-0.67363239
+    [diag    100] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.015 acc=0.34 Var/site=2.387e-02
+[   120] E=-24.26466212  E/site=-0.67401839
+    [diag    120] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.33 Var/site=2.440e-02
+[   140] E=-24.24973496  E/site=-0.67360375
+    [diag    140] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.33 Var/site=2.223e-02
+[   160] E=-24.25261199  E/site=-0.67368367
+    [diag    160] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.157e-02
+[   180] E=-24.25987089  E/site=-0.67388530
+    [diag    180] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.253e-02
+[   200] E=-24.26204473  E/site=-0.67394569
+    [diag    200] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.007 acc=0.34 Var/site=2.275e-02
+[   220] E=-24.26794971  E/site=-0.67410971
+    [diag    220] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.292e-02
+[   240] E=-24.27080972  E/site=-0.67418916
+    [diag    240] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.33 Var/site=2.367e-02
+[   260] E=-24.27114362  E/site=-0.67419843
+    [diag    260] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.006 acc=0.34 Var/site=2.291e-02
+[   280] E=-24.25718503  E/site=-0.67381070
+    [diag    280] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.008 acc=0.34 Var/site=2.190e-02
+[   300] E=-24.27552188  E/site=-0.67432005
+    [diag    300] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.019 acc=0.34 Var/site=2.223e-02
+[   320] E=-24.25463565  E/site=-0.67373988
+    [diag    320] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.009 acc=0.34 Var/site=2.192e-02
+[   340] E=-24.26749422  E/site=-0.67409706
+    [diag    340] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.33 Var/site=2.314e-02
+[   360] E=-24.25903991  E/site=-0.67386222
+    [diag    360] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.33 Var/site=2.241e-02
+[   380] E=-24.26565576  E/site=-0.67404599
+    [diag    380] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.023 acc=0.34 Var/site=2.139e-02
+[   400] E=-24.27653622  E/site=-0.67434823
+    [diag    400] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.025 acc=0.34 Var/site=2.143e-02
+[   420] E=-24.26253115  E/site=-0.67395920
+    [diag    420] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.215e-02
+[   440] E=-24.25466232  E/site=-0.67374062
+    [diag    440] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.021 acc=0.33 Var/site=2.087e-02
+[   460] E=-24.27364637  E/site=-0.67426795
+    [diag    460] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.009 acc=0.33 Var/site=2.326e-02
+[   480] E=-24.26462897  E/site=-0.67401747
+    [diag    480] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.291e-02
+[   500] E=-24.26324827  E/site=-0.67397912
+    [diag    500] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.008 acc=0.34 Var/site=2.202e-02
+[   520] E=-24.25973322  E/site=-0.67388148
+    [diag    520] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.016 acc=0.34 Var/site=2.196e-02
+[   540] E=-24.26081687  E/site=-0.67391158
+    [diag    540] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.016 acc=0.34 Var/site=2.199e-02
+[   560] E=-24.24437541  E/site=-0.67345487
+    [diag    560] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.030 acc=0.34 Var/site=2.194e-02
+[   580] E=-24.24289294  E/site=-0.67341369
+    [diag    580] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.019 acc=0.34 Var/site=2.566e-02
+[   600] E=-24.24926463  E/site=-0.67359068
+    [diag    600] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.289e-02
+[   620] E=-24.25752718  E/site=-0.67382020
+    [diag    620] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.015 acc=0.34 Var/site=2.419e-02
+[   640] E=-24.26051708  E/site=-0.67390325
+    [diag    640] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.007 acc=0.35 Var/site=2.230e-02
+[   660] E=-24.26966057  E/site=-0.67415724
+    [diag    660] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.33 Var/site=2.336e-02
+[   680] E=-24.23451636  E/site=-0.67318101
+    [diag    680] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.486e-02
+[   700] E=-24.24834438  E/site=-0.67356512
+    [diag    700] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.33 Var/site=2.347e-02
+[   720] E=-24.27153246  E/site=-0.67420924
+    [diag    720] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.474e-02
+[   740] E=-24.26821410  E/site=-0.67411706
+    [diag    740] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.020 acc=0.34 Var/site=2.257e-02
+[   760] E=-24.26730235  E/site=-0.67409173
+    [diag    760] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.016 acc=0.34 Var/site=2.361e-02
+[   780] E=-24.27131901  E/site=-0.67420331
+    [diag    780] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.016 acc=0.34 Var/site=2.097e-02
+[   800] E=-24.25137864  E/site=-0.67364941
+    [diag    800] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.430e-02
+[   820] E=-24.28152562  E/site=-0.67448682
+    [diag    820] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.33 Var/site=2.302e-02
+[   840] E=-24.25727046  E/site=-0.67381307
+    [diag    840] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.018 acc=0.33 Var/site=2.226e-02
+[   860] E=-24.27267778  E/site=-0.67424105
+    [diag    860] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.020 acc=0.33 Var/site=2.299e-02
+[   880] E=-24.27308076  E/site=-0.67425224
+    [diag    880] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.016 acc=0.34 Var/site=2.117e-02
+[   900] E=-24.27685844  E/site=-0.67435718
+    [diag    900] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.009 acc=0.34 Var/site=2.236e-02
+[   920] E=-24.26078984  E/site=-0.67391083
+    [diag    920] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.184e-02
+[   940] E=-24.27489079  E/site=-0.67430252
+    [diag    940] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.008 acc=0.34 Var/site=2.113e-02
+[   960] E=-24.27109912  E/site=-0.67419720
+    [diag    960] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.156e-02
+[   980] E=-24.27366822  E/site=-0.67426856
+    [diag    980] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.34 Var/site=2.222e-02
+[  1000] E=-24.26242224  E/site=-0.67395617
+    [diag   1000] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.33 Var/site=2.165e-02
+[  1020] E=-24.26585770  E/site=-0.67405160
+    [diag   1020] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.019 acc=0.34 Var/site=2.256e-02
+[  1040] E=-24.27649142  E/site=-0.67434698
+    [diag   1040] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.33 Var/site=2.250e-02
+[  1060] E=-24.27450617  E/site=-0.67429184
+    [diag   1060] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.015 acc=0.34 Var/site=2.138e-02
+[  1080] E=-24.25789029  E/site=-0.67383029
+    [diag   1080] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.009 acc=0.34 Var/site=2.117e-02
+[  1100] E=-24.25790323  E/site=-0.67383065
+    [diag   1100] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.196e-02
+[  1120] E=-24.25949198  E/site=-0.67387478
+    [diag   1120] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.33 Var/site=2.141e-02
+[  1140] E=-24.26142298  E/site=-0.67392842
+    [diag   1140] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.017 acc=0.34 Var/site=2.123e-02
+[  1160] E=-24.26631389  E/site=-0.67406427
+    [diag   1160] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.009 acc=0.34 Var/site=2.262e-02
+[  1180] E=-24.25835614  E/site=-0.67384323
+    [diag   1180] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.125e-02
+[  1200] E=-24.24716137  E/site=-0.67353226
+    [diag   1200] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.396e-02
+[  1220] E=-24.26019864  E/site=-0.67389441
+    [diag   1220] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.016 acc=0.34 Var/site=2.223e-02
+[  1240] E=-24.26988888  E/site=-0.67416358
+    [diag   1240] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.172e-02
+[  1260] E=-24.26257812  E/site=-0.67396050
+    [diag   1260] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.019 acc=0.34 Var/site=2.230e-02
+[  1280] E=-24.24780745  E/site=-0.67355021
+    [diag   1280] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.33 Var/site=2.228e-02
+[  1300] E=-24.24674872  E/site=-0.67352080
+    [diag   1300] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.019 acc=0.34 Var/site=2.298e-02
+[  1320] E=-24.26656165  E/site=-0.67407116
+    [diag   1320] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.017 acc=0.34 Var/site=2.169e-02
+[  1340] E=-24.26423522  E/site=-0.67400653
+    [diag   1340] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.189e-02
+[  1360] E=-24.26156429  E/site=-0.67393234
+    [diag   1360] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.33 Var/site=2.321e-02
+[  1380] E=-24.27207432  E/site=-0.67422429
+    [diag   1380] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.33 Var/site=2.160e-02
+[  1400] E=-24.28166332  E/site=-0.67449065
+    [diag   1400] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.006 acc=0.34 Var/site=2.166e-02
+[  1420] E=-24.26918499  E/site=-0.67414403
+    [diag   1420] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.015 acc=0.34 Var/site=2.233e-02
+[  1440] E=-24.26546098  E/site=-0.67404058
+    [diag   1440] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.170e-02
+[  1460] E=-24.25452649  E/site=-0.67373685
+    [diag   1460] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.016 acc=0.34 Var/site=2.295e-02
+[  1480] E=-24.26804782  E/site=-0.67411244
+    [diag   1480] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.33 Var/site=2.200e-02
+[  1500] E=-24.26921365  E/site=-0.67414482
+    [diag   1500] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.225e-02
+[  1520] E=-24.27369834  E/site=-0.67426940
+    [diag   1520] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.009 acc=0.34 Var/site=2.118e-02
+[  1540] E=-24.26901843  E/site=-0.67413940
+    [diag   1540] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.009 acc=0.34 Var/site=2.115e-02
+[  1560] E=-24.26168396  E/site=-0.67393567
+    [diag   1560] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.017 acc=0.33 Var/site=2.173e-02
+[  1580] E=-24.28100131  E/site=-0.67447226
+    [diag   1580] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.018 acc=0.34 Var/site=2.228e-02
+[  1600] E=-24.25793886  E/site=-0.67383163
+    [diag   1600] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.020 acc=0.33 Var/site=2.241e-02
+[  1620] E=-24.26082333  E/site=-0.67391176
+    [diag   1620] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.016 acc=0.34 Var/site=2.160e-02
+[  1640] E=-24.25246058  E/site=-0.67367946
+    [diag   1640] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.33 Var/site=3.113e-02
+[  1660] E=-24.26113479  E/site=-0.67392041
+    [diag   1660] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.008 acc=0.33 Var/site=2.213e-02
+[  1680] E=-24.25112359  E/site=-0.67364232
+    [diag   1680] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.34 Var/site=2.195e-02
+[  1700] E=-24.27247623  E/site=-0.67423545
+    [diag   1700] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.33 Var/site=2.228e-02
+[  1720] E=-24.25158402  E/site=-0.67365511
+    [diag   1720] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.198e-02
+[  1740] E=-24.26968638  E/site=-0.67415795
+    [diag   1740] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.33 Var/site=2.171e-02
+[  1760] E=-24.26425987  E/site=-0.67400722
+    [diag   1760] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.018 acc=0.33 Var/site=2.358e-02
+[  1780] E=-24.26159147  E/site=-0.67393310
+    [diag   1780] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.337e-02
+[  1800] E=-24.27863400  E/site=-0.67440650
+    [diag   1800] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.34 Var/site=2.329e-02
+[  1820] E=-24.26087503  E/site=-0.67391320
+    [diag   1820] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.33 Var/site=2.174e-02
+[  1840] E=-24.25837445  E/site=-0.67384373
+    [diag   1840] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.008 acc=0.33 Var/site=2.253e-02
+[  1860] E=-24.26909390  E/site=-0.67414150
+    [diag   1860] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.135e-02
+[  1880] E=-24.27325005  E/site=-0.67425695
+    [diag   1880] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.017 acc=0.34 Var/site=2.185e-02
+[  1900] E=-24.25602063  E/site=-0.67377835
+    [diag   1900] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.015 acc=0.34 Var/site=2.094e-02
+[  1920] E=-24.26640684  E/site=-0.67406686
+    [diag   1920] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.004 acc=0.34 Var/site=2.359e-02
+[  1940] E=-24.26151813  E/site=-0.67393106
+    [diag   1940] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.251e-02
+[  1960] E=-24.26254920  E/site=-0.67395970
+    [diag   1960] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.017 acc=0.34 Var/site=2.337e-02
+[  1980] E=-24.25417014  E/site=-0.67372695
+    [diag   1980] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.160e-02
+[  2000] E=-24.27627859  E/site=-0.67434107
+    [diag   2000] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.265e-02
+[  2020] E=-24.27107234  E/site=-0.67419645
+    [diag   2020] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.020 acc=0.34 Var/site=2.590e-02
+[  2040] E=-24.25838334  E/site=-0.67384398
+    [diag   2040] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.35 Var/site=2.610e-02
+[  2060] E=-24.25860159  E/site=-0.67385004
+    [diag   2060] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.33 Var/site=2.261e-02
+[  2080] E=-24.26355515  E/site=-0.67398764
+    [diag   2080] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.273e-02
+[  2100] E=-24.27037010  E/site=-0.67417695
+    [diag   2100] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.008 acc=0.34 Var/site=2.318e-02
+[  2120] E=-24.28476928  E/site=-0.67457692
+    [diag   2120] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.33 Var/site=2.274e-02
+[  2140] E=-24.26342404  E/site=-0.67398400
+    [diag   2140] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.305e-02
+[  2160] E=-24.26949124  E/site=-0.67415253
+    [diag   2160] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.33 Var/site=2.320e-02
+[  2180] E=-24.25492438  E/site=-0.67374790
+    [diag   2180] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.015 acc=0.33 Var/site=2.544e-02
+[  2200] E=-24.27999437  E/site=-0.67444429
+    [diag   2200] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.025 acc=0.33 Var/site=2.295e-02
+[  2220] E=-24.26464379  E/site=-0.67401788
+    [diag   2220] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.007 acc=0.33 Var/site=2.100e-02
+[  2240] E=-24.26407805  E/site=-0.67400217
+    [diag   2240] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.019 acc=0.34 Var/site=2.357e-02
+[  2260] E=-24.27106457  E/site=-0.67419624
+    [diag   2260] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.009 acc=0.34 Var/site=2.225e-02
+[  2280] E=-24.26562267  E/site=-0.67404507
+    [diag   2280] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.023 acc=0.33 Var/site=2.201e-02
+[  2300] E=-24.27374192  E/site=-0.67427061
+    [diag   2300] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.33 Var/site=2.095e-02
+[  2320] E=-24.24615917  E/site=-0.67350442
+    [diag   2320] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.021 acc=0.33 Var/site=2.475e-02
+[  2340] E=-24.27181985  E/site=-0.67421722
+    [diag   2340] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.305e-02
+[  2360] E=-24.26528116  E/site=-0.67403559
+    [diag   2360] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.018 acc=0.34 Var/site=2.080e-02
+[  2380] E=-24.26788622  E/site=-0.67410795
+    [diag   2380] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.187e-02
+[  2400] E=-24.26559586  E/site=-0.67404433
+    [diag   2400] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.820e-02
+[  2420] E=-24.25774136  E/site=-0.67382615
+    [diag   2420] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.110e-02
+[  2440] E=-24.25704322  E/site=-0.67380676
+    [diag   2440] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.017 acc=0.33 Var/site=2.168e-02
+[  2460] E=-24.26751488  E/site=-0.67409764
+    [diag   2460] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.290e-02
+[  2480] E=-24.26247444  E/site=-0.67395762
+    [diag   2480] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.016 acc=0.33 Var/site=2.372e-02
+[  2500] E=-24.27061478  E/site=-0.67418374
+    [diag   2500] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.379e-02
+[  2520] E=-24.25471216  E/site=-0.67374200
+    [diag   2520] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.020 acc=0.34 Var/site=2.124e-02
+[  2540] E=-24.26078528  E/site=-0.67391070
+    [diag   2540] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.008 acc=0.33 Var/site=2.197e-02
+[  2560] E=-24.25540228  E/site=-0.67376117
+    [diag   2560] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.180e-02
+[  2580] E=-24.25140873  E/site=-0.67365024
+    [diag   2580] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.34 Var/site=2.239e-02
+[  2600] E=-24.26319352  E/site=-0.67397760
+    [diag   2600] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.137e-02
+[  2620] E=-24.26025959  E/site=-0.67389610
+    [diag   2620] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.402e-02
+[  2640] E=-24.26445791  E/site=-0.67401272
+    [diag   2640] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.33 Var/site=2.172e-02
+[  2660] E=-24.26552138  E/site=-0.67404226
+    [diag   2660] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.33 Var/site=2.254e-02
+[  2680] E=-24.28469510  E/site=-0.67457486
+    [diag   2680] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.229e-02
+[  2700] E=-24.25690955  E/site=-0.67380304
+    [diag   2700] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.012e-02
+[  2720] E=-24.26380067  E/site=-0.67399446
+    [diag   2720] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.017 acc=0.33 Var/site=2.142e-02
+[  2740] E=-24.27769809  E/site=-0.67438050
+    [diag   2740] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.009 acc=0.34 Var/site=2.318e-02
+[  2760] E=-24.26004181  E/site=-0.67389005
+    [diag   2760] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.019 acc=0.34 Var/site=2.081e-02
+[  2780] E=-24.24948907  E/site=-0.67359692
+    [diag   2780] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.33 Var/site=4.151e-02
+[  2800] E=-24.26591933  E/site=-0.67405331
+    [diag   2800] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.011 acc=0.33 Var/site=2.439e-02
+[  2820] E=-24.26662675  E/site=-0.67407297
+    [diag   2820] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.010 acc=0.34 Var/site=2.296e-02
+[  2840] E=-24.26339257  E/site=-0.67398313
+    [diag   2840] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.015 acc=0.34 Var/site=2.298e-02
+[  2860] E=-24.24627268  E/site=-0.67350757
+    [diag   2860] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.012 acc=0.34 Var/site=2.357e-02
+[  2880] E=-24.26366184  E/site=-0.67399061
+    [diag   2880] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.499e-02
+[  2900] E=-24.25727802  E/site=-0.67381328
+    [diag   2900] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.017 acc=0.34 Var/site=2.136e-02
+[  2920] E=-24.26874998  E/site=-0.67413194
+    [diag   2920] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.020 acc=0.33 Var/site=2.174e-02
+[  2940] E=-24.27526269  E/site=-0.67431285
+    [diag   2940] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.013 acc=0.34 Var/site=2.237e-02
+[  2960] E=-24.25134292  E/site=-0.67364841
+    [diag   2960] alpha=2.0000 ESS_w=8192 (100.0%) Rhat|psi|=1.014 acc=0.34 Var/site=2.216e-02

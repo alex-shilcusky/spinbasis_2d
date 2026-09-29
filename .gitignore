@@ -28,4 +28,4 @@ debugging/*
 # Run output (submit.sh's default RUN_ROOT). Must stay ignored: submit.sh
 # refuses to submit from a dirty tree, so tracked-looking output would block
 # every submission after the first.
-spinbasis_data/
+#spinbasis_data/
