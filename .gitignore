@@ -29,3 +29,4 @@ debugging/*
 # refuses to submit from a dirty tree, so tracked-looking output would block
 # every submission after the first.
 #spinbasis_data/
+spinbasis_data/
