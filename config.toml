@@ -62,13 +62,24 @@ param_dtype = "complex128"    # "float64" relies on sign_rule for the sign
 #   What worked: symmetries = "translation", param_dtype = "float64",
 #   sign_rule = "TF" (the J2 = 0 ground state is then positive), plain SR
 #   (auto_alpha = false, alpha = 2.0): E/site -0.6993, rel. err 3.6e-3.
+#
+# init_std matters more than anything else here. NetKet's symmetric-RBM default
+# (0.1) is too wide on 6x6: summing |G| images spreads log|psi| across samples
+# far enough that E_loc blows up. Measured at init (6x6, J2 = 0, 512 samples,
+# float64, sign_rule "TF"), as (E/site, spread of log|psi| over samples):
+#   translation alpha=8   0.1 -> (   -0.5032, 13.9)   0.01 -> (-0.5260, 0.21)
+#   space_group alpha=64  0.1 -> (-592044.76, 34.8)   0.01 -> (-0.5526, 1.09)
+# A wide spread also starts the sampler nearly frozen on the single
+# largest-amplitude configuration, which is exactly the zero-variance
+# stationary point described above -- so 0.01 is the default here, not 0.1.
 alpha = 1.0
 symmetries = "none"           # "none" | "translation" | "space_group"
 use_visible_bias = true       # ignored for symmetric RBMs: their single bias
                               # multiplies sum_i s_i = 0 at Sz = 0
 param_dtype = "complex128"
-# init_std = 0.1              # stddev of the normal init; unset = NetKet default
-#                             # (0.01 for RBM, 0.1 for symmetric RBM)
+init_std = 0.01               # stddev of the normal init. NetKet's own defaults
+                              # are 0.01 (RBM) / 0.1 (symmetric RBM); 0.1 is
+                              # unusable for space_group, see above.
 
 [model.vit]
 # The tutorial's spin-basis ViT (factored attention). Real parameters, complex
@@ -101,6 +112,14 @@ MAX_RUNTIME_MIN = 230
 SAVE_EVERY = 50       # checkpoint (+ .progress) and log-flush interval
 PRINT_EVERY = 20
 DIAG_EVERY = -1       # sampling-health diag -> .diag.jsonl; -1 = PRINT_EVERY, 0 = off
+FREEZE_PATIENCE = 3   # abort after this many CONSECUTIVE diags showing a
+                      # collapsed wavefunction: Metropolis acceptance < 1e-3
+                      # AND Var(E_loc)/N < 1e-12. That pair is never
+                      # convergence -- it is psi concentrated on a single
+                      # configuration, where E_loc is constant, the sampled
+                      # gradient is 0 and SR sits at a false stationary point.
+                      # The 2026-09-28 Jastrow run burned a whole 2.3 h window
+                      # frozen that way. 0 = off. Needs DIAG_EVERY != 0.
 CHUNK_SIZE = 2048
 
 [misc]
@@ -137,16 +156,53 @@ EXACT_SAMPLER_MAX_STATES = 200_000
 
 # ----------------------------------------------------------------------
 # ACTIVE SWEEP -- 4 runs, zipped column-wise (column i -> run_000i):
-#   run_0000  Jastrow
-#   run_0001  RBM, hidden-unit density 1.0
-#   run_0002  RBM, hidden-unit density 2.0
-#   run_0003  ViT, num_layers=2, n_heads=12, d_model=72 (ratio 6), as in [model.vit]
-# model.rbm.alpha is only read by the RBM runs. The Jastrow and ViT columns
-# hold the base value 1.0 because every zipped list needs 4 entries; it is
-# ignored there, but it will still appear in their manifest sweep_values.
+#   run_0000  RBMSymm, translations only        (296 params)
+#   run_0001  RBMSymm, full space group          (296 params)
+#   run_0002  ViT, narrow: d_model=36, 9 patches  (29,880 params)
+#   run_0003  ViT, patch 3: d_model=72, 4 patches (117,024 params)
+#
+# Follow-up to 2026-09-28 (Jastrow / RBM a=1 / RBM a=2 / ViT), where the ViT
+# reached E/site = -0.678868 (rel.err 6e-6) and the plain RBMs stalled at
+# 7.2e-3 (a=1, 1368 params) and 3.2e-3 (a=2, 2700 params).
+#
+# Runs 0-1: does imposing lattice symmetry buy accuracy per parameter? A
+# symmetric RBM has features = alpha * N / |G| feature maps and
+# features * (N + 1) parameters, so the count depends ONLY on the feature
+# count, not on the group: translation alpha=8 and space_group alpha=64 both
+# give 8 features and exactly 296 parameters. The two columns therefore
+# isolate the point group at identical capacity -- and both are ~4.6x smaller
+# than the RBM a=1 that managed 7.2e-3. They use float64 + sign_rule "TF"
+# because complex128 + "FF" stalls at the Neel state (see [model.rbm]).
+#
+# Runs 2-3: the ViT is already at the reference on 6x6, so the question is how
+# little it can get away with before L = 8 or J2 > 0.
+#   run_0002 shrinks capacity 4x at fixed shape.
+#   run_0003 keeps capacity (patch size barely moves the parameter count --
+#            the patch embedding is tiny next to the blocks) and changes the
+#            tokenization to 4 patches of 9 spins. NOTE this also WEAKENS the
+#            enforced symmetry: transl_invariant covers (L/patch_size)^2
+#            translations, i.e. 4 here against 9 for patch 2.
+#
+# sign_rule is a unitary transformation, so E0 is unchanged and rel.err stays
+# comparable across the "TF" and "FF" columns.
+#
+# Every zipped list needs 4 entries, so the [model.rbm] keys carry base values
+# in the ViT columns and vice versa. They are ignored there, but they do show
+# up in that run's manifest sweep_values.
 # ----------------------------------------------------------------------
+[sweep_zip.system]
+sign_rule = ["TF", "TF", "FF", "FF"]
+
 [sweep_zip.model]
-type = ["jastrow", "rbm", "rbm", "vit"]
+type = ["rbm", "rbm", "vit", "vit"]
 
 [sweep_zip.model.rbm]
-alpha = [1.0, 1.0, 2.0, 1.0]
+alpha        = [8.0, 64.0, 1.0, 1.0]
+symmetries   = ["translation", "space_group", "none", "none"]
+param_dtype  = ["float64", "float64", "complex128", "complex128"]
+init_std     = [0.01, 0.01, 0.01, 0.01]
+
+[sweep_zip.model.vit]
+d_model    = [72, 72, 36, 72]
+n_heads    = [12, 12, 6, 12]
+patch_size = [2, 2, 2, 3]

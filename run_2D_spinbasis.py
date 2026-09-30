@@ -128,12 +128,16 @@ def parse_config():
 
     # Run
     global max_runtime, save_every, print_every, diag_every, chunk_size
+    global freeze_patience
     run = config["run"]
     max_runtime = run["MAX_RUNTIME_MIN"]
     save_every = run["SAVE_EVERY"]
     print_every = run["PRINT_EVERY"]
     diag_every = run["DIAG_EVERY"]
     chunk_size = run["CHUNK_SIZE"]
+    # .get: runs resumed from a sweep submitted before this key existed read
+    # their own config.json, which does not have it.
+    freeze_patience = int(run.get("FREEZE_PATIENCE", 3))
 
     # Misc
     global EXACT_SAMPLER_MAX_STATES
@@ -222,9 +226,11 @@ PROGRESS = fname + '.progress'
 DONE = fname + '.done'
 CKPT = fname + '.mpack'
 TIMEOUT = fname + '.timeout'
+FROZEN = fname + '.frozen'
 DIAG = fname + '.diag.jsonl'
-if os.path.exists(TIMEOUT):
-    os.remove(TIMEOUT)
+for _stale in (TIMEOUT, FROZEN):
+    if os.path.exists(_stale):
+        os.remove(_stale)
 
 def _read_progress_json():
     if os.path.exists(PROGRESS):
@@ -439,13 +445,25 @@ class SamplingDiag:
       acceptance         : Metropolis acceptance fraction (none for exact).
       var_eloc / _per_site : Var(E_loc), and divided by N_sites.
 
-    A broken diagnostic must never kill a run: every part is guarded."""
-    def __init__(self, alpha, every, diag_path, n_sites):
+    A broken diagnostic must never kill a run: every part is guarded -- the one
+    deliberate exception is the freeze guard below, which stops the driver when
+    the wavefunction has demonstrably collapsed (see `frozen`)."""
+
+    # Collapse signature. Healthy runs sit orders of magnitude away from both:
+    # the 2026-09-28 sweep held acc ~ 0.3 with Var/site between 1e-2 (RBM) and
+    # 3e-5 (ViT), while the frozen Jastrow read acc = 0.00, Var/site = 9e-32.
+    FREEZE_ACC = 1e-3
+    FREEZE_VAR = 1e-12
+
+    def __init__(self, alpha, every, diag_path, n_sites, patience=0):
         # fallback only: the weights must use the exponent the driver is
         # sampling at right now, or ess_w drifts once adaptive alpha moves
         self.alpha = float(alpha)
         self.every = max(1, int(every))
         self.path = diag_path
+        self.patience = int(patience)
+        self.streak = 0            # consecutive diags matching the signature
+        self.frozen = False        # set when the guard fires; read at finalize
         self.n_sites = int(n_sites)
 
     def _alpha(self, driver):
@@ -533,7 +551,38 @@ class SamplingDiag:
         if "acceptance" in rec:        msg += f' acc={rec["acceptance"]:.2f}'
         if "var_eloc_per_site" in rec: msg += f' Var/site={rec["var_eloc_per_site"]:.3e}'
         print(msg, flush=True)
-        return True
+
+        return self._check_freeze(step, rec)
+
+    def _check_freeze(self, step, rec):
+        """False => stop the driver, the wavefunction has collapsed.
+
+        Acceptance at zero AND a machine-precision E_loc variance means psi has
+        collapsed onto one configuration: E_loc is then constant, so the sampled
+        gradient vanishes and SR is parked at a false stationary point. It never
+        recovers, so stop instead of burning the rest of the window.
+
+        Both quantities must be present and finite -- a missing or broken
+        diagnostic must not trigger a stop -- and the signature must hold for
+        `patience` diagnostics in a row, so one unlucky sample cannot end a run.
+        """
+        if self.patience <= 0:
+            return True
+        acc = rec.get("acceptance")
+        var = rec.get("var_eloc_per_site")
+        hit = (acc is not None and var is not None
+               and np.isfinite(acc) and np.isfinite(var)
+               and acc < self.FREEZE_ACC and var < self.FREEZE_VAR)
+        self.streak = self.streak + 1 if hit else 0
+        if self.streak < self.patience:
+            return True
+        self.frozen = True
+        print(f'\n*** collapsed wavefunction at step {step}: '
+              f'acceptance {acc:.2e} < {self.FREEZE_ACC:g} and '
+              f'Var/site {var:.2e} < {self.FREEZE_VAR:g} for '
+              f'{self.streak} consecutive diagnostics. Stopping; '
+              f'no resubmission. ***', flush=True)
+        return False
 
 progress_cb = ProgressWriter(save_every, print_every, E0)
 time_cb = TimeBudget(max_runtime)
@@ -542,8 +591,16 @@ time_cb = TimeBudget(max_runtime)
 diag_every = print_every if diag_every < 0 else diag_every
 diag_cb = None
 if diag_every > 0:
-    diag_cb = SamplingDiag(alpha=alpha, every=diag_every, diag_path=DIAG, n_sites=N_sites)
+    diag_cb = SamplingDiag(alpha=alpha, every=diag_every, diag_path=DIAG,
+                           n_sites=N_sites, patience=freeze_patience)
     print(f'sampling diagnostics -> {os.path.basename(DIAG)} every {diag_every} steps', flush=True)
+    if freeze_patience > 0:
+        print(f'freeze guard: stop after {freeze_patience} consecutive diags with '
+              f'acc < {SamplingDiag.FREEZE_ACC:g} and Var/site < '
+              f'{SamplingDiag.FREEZE_VAR:g}', flush=True)
+elif freeze_patience > 0:
+    print('freeze guard requested but DIAG_EVERY = 0 disables the diagnostics '
+          'it reads; guard is OFF.', flush=True)
 
 # ---- one continuous log across resubmissions --------------------------------
 # The driver's step counter is seeded with the global offset, so the .log
@@ -614,6 +671,11 @@ if cum >= iters:
 elif time_cb.stopped:
     open(TIMEOUT, 'w').close()
     print(f'\n*** Clean wall-clock stop at cum={cum}/{iters}. Wrote .timeout (resubmit). ***')
+elif diag_cb is not None and diag_cb.frozen:
+    open(FROZEN, 'w').close()
+    print(f'\n*** Stopped early at cum={cum}/{iters}: collapsed wavefunction '
+          f'(acceptance ~ 0 with zero E_loc variance). Wrote .frozen; '
+          f'no resubmission. ***')
 else:
     print(f'\n*** Stopped early at cum={cum}/{iters} WITHOUT clean time-stop '
           f'(divergence?). No resubmission. ***')

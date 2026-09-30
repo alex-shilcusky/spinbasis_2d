@@ -333,6 +333,10 @@ elif [[ -f "${FNAME}.done" ]]; then
     STATUS="completed"
 elif [[ -f "${FNAME}.timeout" ]]; then
     STATUS="timeout"
+elif [[ -f "${FNAME}.frozen" ]]; then
+    # The freeze guard stopped a collapsed wavefunction on purpose: a verdict,
+    # not a crash. Never resubmitted (that needs .timeout), same as "failed".
+    STATUS="frozen"
 else
     STATUS="failed"
 fi
