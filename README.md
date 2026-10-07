@@ -44,6 +44,22 @@ uv sync                 # uv.lock pins the same versions as 2d_eigenbasis
 ./submit.sh config.toml
 ```
 
+## Submitting: cluster profiles (same as 2d_eigenbasis)
+
+Partition, account, GPU, memory and walltime come from a **cluster profile**
+in `clusters/`, identical to the one in `2d_eigenbasis`. Choose it per submission:
+
+```bash
+./submit.sh config.toml                       # autodetected: AICR b200-devel (4 h) or Explorer
+CLUSTER=aicr-batch ./submit.sh config.toml    # AICR b200-batch (24 h)
+CLUSTER=explorer   ./submit.sh config.toml    # Northeastern Explorer
+```
+
+The choice is written to `<sweep>/cluster.txt`, and `run.sh` reloads it on
+every auto-resubmission, so a sweep never switches partition mid-run.
+`config.toml`'s `MAX_RUNTIME_MIN` must sit below the profile's walltime
+(230 for devel, 1380 for batch); `submit.sh` checks this and refuses if not.
+
 ## Choosing a wavefunction
 
 Set `[model] type` and edit that type's table (`[model.jastrow]`,

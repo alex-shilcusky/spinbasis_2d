@@ -220,9 +220,12 @@ EXACT_SAMPLER_MAX_STATES = 200_000
 #   sampling   both: auto_alpha ON, starting from alpha = 2.0. One run per basis.
 #              (At FIXED alpha = 2 the eigenbasis Metropolis acceptance fell to
 #              0.07 at J2 = 0; adaptive alpha should move it down from there.)
-#   partition  b200-batch: 24 h windows, MAX_RUNTIME_MIN = 1380
-#              eigen: CLUSTER=aicr-batch ./submit.sh config.toml
-#              spin:  run.sh requests b200-batch, so plain ./submit.sh config.toml
+#   partition  b200-batch: 24 h windows, MAX_RUNTIME_MIN = 1380. Both repos use
+#              the same cluster profiles (clusters/), so in BOTH:
+#                  CLUSTER=aicr-batch ./submit.sh config.toml
+#              The profile is recorded in <sweep>/cluster.txt and every
+#              auto-resubmission reuses it. Without the flag submit.sh picks
+#              the devel profile and refuses (1380 min > 4 h walltime).
 # Exact reference: E0/site = -0.50381 (6x6, J2 = 0.5,
 # importance_sampling_nqs/energy_ref_litt.json).
 # The eigenbasis Hamiltonian was checked at J2 = 0.5 before this run: it

@@ -75,7 +75,23 @@ if ! command -v module >/dev/null 2>&1; then
     echo "ERROR: Environment Modules is not available." >&2
     exit 1
 fi
-module load miniforge3
+
+# --------------------------------------------------------------------------
+# Cluster profile
+#
+# Resolved before the module load, because which python module exists is
+# itself cluster-specific. Autodetects from the Slurm partitions visible on
+# this login node; override with CLUSTER=explorer ./submit.sh config.toml
+# --------------------------------------------------------------------------
+
+source "$SCRIPT_DIR/clusters/common.sh"
+cluster_load
+
+echo
+cluster_summary
+echo
+
+module load "$CLUSTER_PYTHON_MODULE"
 
 if ! command -v python >/dev/null 2>&1; then
     echo "ERROR: python not found." >&2
@@ -185,6 +201,11 @@ SWEEP_DIR="$RUN_ROOT/$SWEEP_ID"
 MATRIX="$SWEEP_DIR/matrix.json"
 
 mkdir -p "$SWEEP_DIR"
+
+# run.sh reads this back on the compute node, where autodetection cannot see
+# the login node's hostname and where a resumed sweep must stay on the
+# cluster it started on.
+echo "$CLUSTER_NAME" > "$SWEEP_DIR/cluster.txt"
 
 echo
 echo "Parsing configuration and expanding sweep..."
@@ -457,13 +478,61 @@ for run in data["runs"]:
 PY
 
 # --------------------------------------------------------------------------
+# Walltime consistency
+#
+# MAX_RUNTIME_MIN is what stops the run gracefully and writes the checkpoint.
+# If it is not safely below the profile's --time, Slurm hard-kills the job
+# first and that window's progress is lost. This used to be two numbers kept
+# in sync by hand, in two files; now it is checked.
+# --------------------------------------------------------------------------
+
+WALL_MIN="$(cluster_walltime_minutes "$CLUSTER_WALLTIME" || true)"
+CONFIG_MAX_RUNTIME="$(python - "$MATRIX" <<'PY'
+import json, sys
+with open(sys.argv[1]) as f:
+    matrix = json.load(f)
+vals = {r["config"]["run"]["MAX_RUNTIME_MIN"] for r in matrix["runs"]}
+print(max(vals))
+PY
+)"
+
+if [[ -z "$WALL_MIN" ]]; then
+    echo "WARNING: could not parse CLUSTER_WALLTIME='$CLUSTER_WALLTIME';" >&2
+    echo "         skipping the MAX_RUNTIME_MIN consistency check." >&2
+elif [[ "$CONFIG_MAX_RUNTIME" -ge "$WALL_MIN" ]]; then
+    echo >&2
+    echo "ERROR: MAX_RUNTIME_MIN ($CONFIG_MAX_RUNTIME min) is not below the" >&2
+    echo "       $CLUSTER_NAME walltime $CLUSTER_WALLTIME ($WALL_MIN min)." >&2
+    echo "       Slurm would hard-kill the job before the checkpoint is" >&2
+    echo "       written, losing that window's progress." >&2
+    echo >&2
+    echo "       Set MAX_RUNTIME_MIN in $CONFIG to $CLUSTER_MAX_RUNTIME_MIN," >&2
+    echo "       or raise CLUSTER_WALLTIME in clusters/$CLUSTER_NAME.sh." >&2
+    exit 1
+elif [[ "$CONFIG_MAX_RUNTIME" -gt "$((WALL_MIN - 5))" ]]; then
+    echo "WARNING: MAX_RUNTIME_MIN ($CONFIG_MAX_RUNTIME min) leaves under 5 min" >&2
+    echo "         of margin below the $CLUSTER_WALLTIME walltime." >&2
+elif [[ "$((CONFIG_MAX_RUNTIME * 2))" -lt "$WALL_MIN" ]]; then
+    # The opposite mistake to the one above, and a silent one: the job is legal,
+    # it just parks a long allocation and stops itself early. Switching to a
+    # bigger partition without raising MAX_RUNTIME_MIN lands exactly here.
+    echo >&2
+    echo "WARNING: MAX_RUNTIME_MIN ($CONFIG_MAX_RUNTIME min) is less than half the" >&2
+    echo "         $CLUSTER_NAME walltime $CLUSTER_WALLTIME ($WALL_MIN min)." >&2
+    echo "         The job will hold the allocation for $WALL_MIN min and stop" >&2
+    echo "         itself after $CONFIG_MAX_RUNTIME, needing more windows than" >&2
+    echo "         necessary. This profile recommends $CLUSTER_MAX_RUNTIME_MIN." >&2
+    echo "         Set MAX_RUNTIME_MIN in $CONFIG to $CLUSTER_MAX_RUNTIME_MIN." >&2
+fi
+
+# --------------------------------------------------------------------------
 # Confirmation.
 # --------------------------------------------------------------------------
 
 if [[ "$NUM_RUNS" -gt 1 ]]; then
-    echo "This will submit a Slurm job array with $NUM_RUNS tasks."
+    echo "This will submit a Slurm job array with $NUM_RUNS tasks to $CLUSTER_NAME."
 else
-    echo "This will submit one Slurm job."
+    echo "This will submit one Slurm job to $CLUSTER_NAME."
 fi
 
 echo
@@ -489,6 +558,7 @@ echo "Running Slurm preflight check..."
 
 if ! sbatch \
     --test-only \
+    "${CLUSTER_SBATCH_ARGS[@]}" \
     --array="0-$((NUM_RUNS - 1))" \
     run.sh \
     "$MATRIX" \
@@ -515,6 +585,7 @@ cp "$CONFIG" "$SWEEP_DIR/config.toml"
 JOB_ID="$(
     sbatch \
         --parsable \
+        "${CLUSTER_SBATCH_ARGS[@]}" \
         --array="0-$((NUM_RUNS - 1))" \
         run.sh \
         "$MATRIX" \

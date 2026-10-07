@@ -1,30 +1,16 @@
 #!/bin/bash
 
-# AICR (docs.aicr.ai). Nodes are 128-core EPYC 9745 / 1.125 TB RAM with 8 GPUs,
-# so 16 cores + 64 GB is roughly the per-GPU share. AICR's default memory is
-# only 1 GB per CPU, so --mem is mandatory. GPUs are requested with --gpus;
-# --gres is not used here, and the partition (not a type string) selects the
-# hardware.
+# Portable Slurm directives only. Everything that differs between clusters --
+# partition, account, GPU request, memory, cores, walltime -- comes from the
+# cluster profile in clusters/<name>.sh and is passed on the sbatch COMMAND
+# LINE by submit.sh (and below, when this script resubmits itself). Slurm
+# gives command-line options precedence over these in-script directives.
 #
-# CURRENTLY ON THE BATCH PARTITION: 24 h cap. To switch, change BOTH of these
-# together:
-#
-#     --partition=b200-batch  <->  b200-devel     (24 h cap <-> 4 h cap, max 4
-#     --time=24:00:00         <->  04:00:00        concurrent devel jobs per user)
-#
-# and set MAX_RUNTIME_MIN in config.toml to match (1380 for 24 h, 230 for 4 h).
-# --time and MAX_RUNTIME_MIN MUST stay consistent: MAX_RUNTIME_MIN is what
-# stops the run gracefully and writes the checkpoint, so if it exceeds --time
-# Slurm hard-kills the job first and that window's progress is lost.
-#SBATCH --partition=b200-batch
-#SBATCH --account=p2026_0109_neu
+# Switch clusters with:   CLUSTER=explorer ./submit.sh config.toml
+# See clusters/common.sh for how the profile is resolved.
 #SBATCH --nodes=1
-#SBATCH --gpus=1
-#SBATCH --time=24:00:00
 #SBATCH --job-name=SB2D
-#SBATCH --mem=64G
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
 #SBATCH --output=run_hist/run_%A_%a.out
 #SBATCH --error=run_hist/run_%A_%a.err
 # stdout/stderr are redirected into the per-run directory below,
@@ -127,6 +113,34 @@ fi
 cd "$REPO_ROOT" || { echo "ERROR: cannot cd to $REPO_ROOT" >&2; exit 1; }
 
 # --------------------------------------------------------------------------
+# Cluster profile
+#
+# Resolved BEFORE any module command, because which python module to load is
+# itself cluster-specific.
+#
+# The sweep records the cluster it was submitted on in cluster.txt, and that
+# record wins: autodetection runs on a COMPUTE node here, where the hostname
+# differs from the login node, and a resumed sweep must keep using the
+# partition and account it started on.
+# --------------------------------------------------------------------------
+
+source "$REPO_ROOT/clusters/common.sh"
+
+CLUSTER_RECORD="$SWEEP_DIR/cluster.txt"
+if [[ -f "$CLUSTER_RECORD" ]]; then
+    RECORDED_CLUSTER="$(tr -d '[:space:]' < "$CLUSTER_RECORD")"
+else
+    RECORDED_CLUSTER=""
+fi
+
+if ! cluster_load "$RECORDED_CLUSTER"; then
+    echo "ERROR: could not load a cluster profile for this job." >&2
+    exit 1
+fi
+
+echo "Cluster:      $CLUSTER_NAME (${CLUSTER_SOURCE})"
+
+# --------------------------------------------------------------------------
 # Interpreter
 #
 # Purge modules FIRST, before anything runs python, so every python in this
@@ -149,7 +163,7 @@ fi
 #     not exist to PATH -- no error, no warning -- so bare `python` falls
 #     through to whatever else is on PATH. On a compute node that is
 #     /usr/bin/python, i.e. Python 3.6.
-#   - `module purge` removes the miniforge3 module inherited from
+#   - `module purge` removes the python module inherited from
 #     submit.sh, so there is nothing sane left for `python` to resolve to.
 #
 # That combination silently ran this project under Python 3.6 and produced a
@@ -170,9 +184,9 @@ fi
 # base interpreter may have come from a module we just purged.
 if ! "$VENV_PY" -c 'pass' >/dev/null 2>&1; then
     echo "WARNING: $VENV_PY is not runnable after 'module purge';" >&2
-    echo "         retrying with miniforge3 loaded." >&2
+    echo "         retrying with $CLUSTER_PYTHON_MODULE loaded." >&2
     if command -v module >/dev/null 2>&1; then
-        module load miniforge3
+        module load "$CLUSTER_PYTHON_MODULE"
     fi
     if ! "$VENV_PY" -c 'pass' >/dev/null 2>&1; then
         echo "ERROR: venv interpreter is broken. It points at:" >&2
@@ -436,7 +450,11 @@ PY
         # Resubmit the repo's copy of this script, NOT "$0": Slurm runs a
         # spool copy of the batch script, and that path disappears when the
         # job's spool directory is cleaned up.
+        # The resource flags must be repeated here: they are no longer
+        # #SBATCH directives inside run.sh, so a bare resubmission would
+        # land on the cluster's default partition with default memory.
         sbatch \
+            "${CLUSTER_SBATCH_ARGS[@]}" \
             --array="$SLURM_ARRAY_TASK_ID" \
             "$REPO_ROOT/run.sh" \
             "$MATRIX" \
