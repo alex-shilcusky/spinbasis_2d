@@ -16,13 +16,14 @@ set -euo pipefail
 CONFIG="${1:-config.toml}"
 
 # Resolved relative to this script so the same checkout works on the RC cluster
-# and locally: runs go to "spinbasis_data" INSIDE the repo directory holding
-# submit.sh, kept separate from the eigenbasis project's ../2D_data. It is
-# gitignored, which matters: this script refuses to submit from a dirty tree.
+# and locally: runs go to "spinbasis_data_2d", a SISTER of this repo directory
+# (master/spinbasis_data_2d), next to the eigenbasis project's ../2D_data. Run
+# output therefore never touches git; this matters because the script refuses
+# to submit from a dirty tree.
 # ${BASH_SOURCE[0]} is this file's path, so this is independent of the cwd the
 # script was invoked from. Override with RUN_ROOT=/some/path ./submit.sh ...
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEFAULT_RUN_ROOT="$SCRIPT_DIR/spinbasis_data"
+DEFAULT_RUN_ROOT="$(dirname "$SCRIPT_DIR")/spinbasis_data_2d"
 RUN_ROOT="${RUN_ROOT:-$DEFAULT_RUN_ROOT}"
 
 # Create the default location on first use. An explicit RUN_ROOT override must

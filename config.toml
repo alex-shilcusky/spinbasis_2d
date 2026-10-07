@@ -10,7 +10,7 @@
 [system]
 L = 6                 # L x L periodic square lattice, N = L^2 spins
 J1 = 1.0
-J2 = 0.0
+J2 = 0.5
 sign_rule = "FF"      # Marshall sign rule per [J1, J2] bond family, T/F each
 
 [sampler]
@@ -86,7 +86,7 @@ init_std = 0.01               # stddev of the normal init. NetKet's own defaults
 # output. d_model must be divisible by n_heads; L by patch_size.
 # transl_invariant = true enforces translations by whole patches only, i.e.
 # (L / patch_size)^2 of the L^2 lattice translations.
-num_layers = 2
+num_layers = 4
 d_model = 72                  # = 6 * 12, the eigenbasis run's ratio * heads
 n_heads = 12
 patch_size = 2
@@ -190,19 +190,38 @@ EXACT_SAMPLER_MAX_STATES = 200_000
 # in the ViT columns and vice versa. They are ignored there, but they do show
 # up in that run's manifest sweep_values.
 # ----------------------------------------------------------------------
-[sweep_zip.system]
-sign_rule = ["TF", "TF", "FF", "FF"]
+# (submitted 2026-09-30; kept for reference, no longer active)
+# [sweep_zip.system]
+# sign_rule = ["TF", "TF", "FF", "FF"]
+#
+# [sweep_zip.model]
+# type = ["rbm", "rbm", "vit", "vit"]
+#
+# [sweep_zip.model.rbm]
+# alpha        = [8.0, 64.0, 1.0, 1.0]
+# symmetries   = ["translation", "space_group", "none", "none"]
+# param_dtype  = ["float64", "float64", "complex128", "complex128"]
+# init_std     = [0.01, 0.01, 0.01, 0.01]
+#
+# [sweep_zip.model.vit]
+# d_model    = [72, 72, 36, 72]
+# n_heads    = [12, 12, 6, 12]
+# patch_size = [2, 2, 2, 3]
 
-[sweep_zip.model]
-type = ["rbm", "rbm", "vit", "vit"]
-
-[sweep_zip.model.rbm]
-alpha        = [8.0, 64.0, 1.0, 1.0]
-symmetries   = ["translation", "space_group", "none", "none"]
-param_dtype  = ["float64", "float64", "complex128", "complex128"]
-init_std     = [0.01, 0.01, 0.01, 0.01]
-
-[sweep_zip.model.vit]
-d_model    = [72, 72, 36, 72]
-n_heads    = [12, 12, 6, 12]
-patch_size = [2, 2, 2, 3]
+# ----------------------------------------------------------------------
+# ACTIVE (2026-10-07): MATCHED 6x6, J2 = 0.5 COMPARISON, spin basis vs eigenbasis
+#
+# One run in each repo, identical network and optimizer. Only the local basis
+# (and each basis's best-known sampling) differs:
+#   network    4 layers, d_model 72, 12 heads, one token per 2x2 plaquette
+#              spin 222,264 params | eigen 222,336 (only the embedding differs)
+#   optimizer  lr 5e-2 -> 2e-2, diag shift 1e-3 -> 1e-4 (400 steps), 10,000 steps
+#   samples    8192; sign_rule "FF" (no Marshall rotation, as in all J2 = 0 runs)
+#   sampling   spin: alpha 2 (plain SR) | eigen: alpha 1.25 fixed (alpha 2 cut
+#              eigenbasis Metropolis acceptance to 0.07 at J2 = 0)
+# Exact reference: E0/site = -0.50381 (6x6, J2 = 0.5,
+# importance_sampling_nqs/energy_ref_litt.json).
+# The eigenbasis Hamiltonian was checked at J2 = 0.5 before this run: it
+# reproduces the exact 4x4 E0/site -0.528620 to 1e-13, and on 6x6 every
+# connected state stays in Sz = 0.
+# ----------------------------------------------------------------------

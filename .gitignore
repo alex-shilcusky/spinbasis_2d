@@ -25,7 +25,7 @@ debugging/*
 
 # Reference papers kept alongside the code (git add -f to track one on purpose)
 *.pdf
-# Run output (submit.sh's default RUN_ROOT). Must stay ignored: submit.sh
-# refuses to submit from a dirty tree, so tracked-looking output would block
-# every submission after the first.
-#spinbasis_data/
+# Run output lives OUTSIDE this repo, in ../spinbasis_data_2d (submit.sh's
+# default RUN_ROOT). The old in-repo location stays ignored so a leftover copy
+# can never make the tree dirty (submit.sh refuses to submit from a dirty tree).
+spinbasis_data/

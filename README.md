@@ -18,19 +18,20 @@ spinbasis_2d/
 ├── config.toml            base configuration + parameter sweeps
 ├── submit.sh              login node: validate, expand sweep, sbatch
 ├── run.sh                 per-task Slurm script + auto-resubmit
-├── helpers/
-│   ├── wavefunctions.py   [model] config -> Flax module (jastrow | rbm | vit)
-│   └── vit.py             the tutorial's spin-basis ViT
-└── spinbasis_data/        run output, one folder per submission (gitignored)
+└── helpers/
+    ├── wavefunctions.py   [model] config -> Flax module (jastrow | rbm | vit)
+    └── vit.py             the tutorial's spin-basis ViT
 ```
 
-Each submission writes `spinbasis_data/<timestamp>G<commit>P<pid>/run_XXXX/`.
-The folder is created on first submit and must stay gitignored: `submit.sh`
-refuses to submit from a dirty tree. Override with
+Run output goes to `spinbasis_data_2d/`, a **sister** of this repo
+(`master/spinbasis_data_2d/`), so data never touches git.
+
+Each submission writes `spinbasis_data_2d/<timestamp>G<commit>P<pid>/run_XXXX/`.
+The folder is created on first submit. Override with
 `RUN_ROOT=/some/existing/path ./submit.sh config.toml`.
 
 The plotting notebook looks for a folder named `2D_data`, so to plot these
-runs set its `DATA_ROOT` to `spinbasis_2d/spinbasis_data` instead.
+runs set its `DATA_ROOT` to `master/spinbasis_data_2d` instead.
 
 ## Setup (once, on the cluster)
 

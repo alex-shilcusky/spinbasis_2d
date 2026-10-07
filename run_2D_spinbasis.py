@@ -10,7 +10,8 @@ driver (overdispersed VMC_NG with optional adaptive alpha), same offset-aware
 lr / diag_shift schedules, same .progress / .done / .timeout sentinels, and the
 same run.* output files, so run.sh auto-resubmits it unchanged and
 plot_energy_vs_iteration.ipynb can read its sweeps (they live in
-spinbasis_2d/spinbasis_data/, so point the notebook's DATA_ROOT there).
+master/spinbasis_data_2d/, a sister of this repo; point the notebook's
+DATA_ROOT there).
 
 What differs from the eigenbasis script
 ---------------------------------------
