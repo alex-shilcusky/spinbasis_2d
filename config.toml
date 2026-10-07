@@ -29,7 +29,7 @@ d_max = 2             # MetropolisExchange: swap spins up to graph distance d_ma
 # it every step. Needs on_the_fly = false and a complex-output wavefunction
 # (the ViT always; RBM / Jastrow with param_dtype = "complex128").
 alpha = 2.0
-auto_alpha = false    # hold alpha fixed at the value above
+auto_alpha = true     # adaptive; alpha above is the STARTING exponent
 use_ntk = true        # neural tangent kernel
 on_the_fly = false
 
@@ -87,8 +87,8 @@ init_std = 0.01               # stddev of the normal init. NetKet's own defaults
 # transl_invariant = true enforces translations by whole patches only, i.e.
 # (L / patch_size)^2 of the L^2 lattice translations.
 num_layers = 4
-d_model = 72                  # = 6 * 12, the eigenbasis run's ratio * heads
-n_heads = 12
+d_model = 48                  # = ratio 6 * 8 heads, matching the eigenbasis run
+n_heads = 8
 patch_size = 2
 transl_invariant = true
 
@@ -108,7 +108,7 @@ ds_transition_steps = 400
 # Graceful-stop budget. MUST stay below --time in run.sh:
 #     b200-devel (--time=04:00:00)  ->  230
 #     b200-batch (--time=24:00:00)  ->  1380
-MAX_RUNTIME_MIN = 230
+MAX_RUNTIME_MIN = 1380
 SAVE_EVERY = 50       # checkpoint (+ .progress) and log-flush interval
 PRINT_EVERY = 20
 DIAG_EVERY = -1       # sampling-health diag -> .diag.jsonl; -1 = PRINT_EVERY, 0 = off
@@ -211,14 +211,18 @@ EXACT_SAMPLER_MAX_STATES = 200_000
 # ----------------------------------------------------------------------
 # ACTIVE (2026-10-07): MATCHED 6x6, J2 = 0.5 COMPARISON, spin basis vs eigenbasis
 #
-# One run in each repo, identical network and optimizer. Only the local basis
-# (and each basis's best-known sampling) differs:
-#   network    4 layers, d_model 72, 12 heads, one token per 2x2 plaquette
-#              spin 222,264 params | eigen 222,336 (only the embedding differs)
+# Identical network and optimizer in both repos. Only the local basis (and each
+# basis's sampling) differs:
+#   network    4 layers, ratio 6, 8 heads (d_model 48), one token per 2x2 plaquette
+#              spin 99,792 params | eigen 99,840 (only the embedding differs)
 #   optimizer  lr 5e-2 -> 2e-2, diag shift 1e-3 -> 1e-4 (400 steps), 10,000 steps
 #   samples    8192; sign_rule "FF" (no Marshall rotation, as in all J2 = 0 runs)
-#   sampling   spin: alpha 2 (plain SR) | eigen: alpha 1.25 fixed (alpha 2 cut
-#              eigenbasis Metropolis acceptance to 0.07 at J2 = 0)
+#   sampling   both: auto_alpha ON, starting from alpha = 2.0. One run per basis.
+#              (At FIXED alpha = 2 the eigenbasis Metropolis acceptance fell to
+#              0.07 at J2 = 0; adaptive alpha should move it down from there.)
+#   partition  b200-batch: 24 h windows, MAX_RUNTIME_MIN = 1380
+#              eigen: CLUSTER=aicr-batch ./submit.sh config.toml
+#              spin:  run.sh requests b200-batch, so plain ./submit.sh config.toml
 # Exact reference: E0/site = -0.50381 (6x6, J2 = 0.5,
 # importance_sampling_nqs/energy_ref_litt.json).
 # The eigenbasis Hamiltonian was checked at J2 = 0.5 before this run: it

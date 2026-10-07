@@ -30,7 +30,7 @@ Each submission writes `spinbasis_data_2d/<timestamp>G<commit>P<pid>/run_XXXX/`.
 The folder is created on first submit. Override with
 `RUN_ROOT=/some/existing/path ./submit.sh config.toml`.
 
-The plotting notebook looks for a folder named `2D_data`, so to plot these
+The plotting notebook looks for a folder named `2D_eigenbasis_data`, so to plot these
 runs set its `DATA_ROOT` to `master/spinbasis_data_2d` instead.
 
 ## Setup (once, on the cluster)

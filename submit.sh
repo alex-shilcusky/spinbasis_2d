@@ -17,7 +17,7 @@ CONFIG="${1:-config.toml}"
 
 # Resolved relative to this script so the same checkout works on the RC cluster
 # and locally: runs go to "spinbasis_data_2d", a SISTER of this repo directory
-# (master/spinbasis_data_2d), next to the eigenbasis project's ../2D_data. Run
+# (master/spinbasis_data_2d), next to the eigenbasis project's ../2D_eigenbasis_data. Run
 # output therefore never touches git; this matters because the script refuses
 # to submit from a dirty tree.
 # ${BASH_SOURCE[0]} is this file's path, so this is independent of the cwd the

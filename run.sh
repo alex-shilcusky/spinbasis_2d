@@ -6,21 +6,21 @@
 # --gres is not used here, and the partition (not a type string) selects the
 # hardware.
 #
-# CURRENTLY ON THE DEVEL PARTITION: 4 h cap, max 4 concurrent jobs per user.
-# To move to production, change BOTH of these together:
+# CURRENTLY ON THE BATCH PARTITION: 24 h cap. To switch, change BOTH of these
+# together:
 #
-#     --partition=b200-devel  ->  b200-batch      (4 h cap -> 24 h cap)
-#     --time=04:00:00         ->  24:00:00
+#     --partition=b200-batch  <->  b200-devel     (24 h cap <-> 4 h cap, max 4
+#     --time=24:00:00         <->  04:00:00        concurrent devel jobs per user)
 #
-# and set MAX_RUNTIME_MIN in config.toml to match (230 for 4 h, 1380 for 24 h).
+# and set MAX_RUNTIME_MIN in config.toml to match (1380 for 24 h, 230 for 4 h).
 # --time and MAX_RUNTIME_MIN MUST stay consistent: MAX_RUNTIME_MIN is what
 # stops the run gracefully and writes the checkpoint, so if it exceeds --time
 # Slurm hard-kills the job first and that window's progress is lost.
-#SBATCH --partition=b200-devel
+#SBATCH --partition=b200-batch
 #SBATCH --account=p2026_0109_neu
 #SBATCH --nodes=1
 #SBATCH --gpus=1
-#SBATCH --time=04:00:00
+#SBATCH --time=24:00:00
 #SBATCH --job-name=SB2D
 #SBATCH --mem=64G
 #SBATCH --ntasks=1
